@@ -8,9 +8,16 @@ function setup() {
   createCanvas(640, 480);
   
   // 1. 開啟視訊鏡頭
-  video = createCapture(VIDEO);
+  // 加入錯誤處理回呼函式，幫助診斷攝影機問題
+  video = createCapture(VIDEO, (stream) => {
+    console.log("攝影機啟動成功");
+  });
+  
   video.size(width, height);
   video.hide(); // 隱藏預設的視訊元件，我們要在 canvas 裡畫
+
+  // 安全檢查：確保 ml5 已經存在
+  if (typeof ml5 === "undefined") return;
 
   // 2. 初始化 Handpose 模型
   // 傳入 video 並在模型載入完成後執行 modelReady

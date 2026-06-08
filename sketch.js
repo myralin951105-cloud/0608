@@ -27,7 +27,7 @@ function preload() {
 }
 
 function setup() {
-  createCanvas(640, 480);
+  createCanvas(windowWidth, windowHeight);
   
   // 1. 開啟視訊鏡頭
   // 加入錯誤處理回呼函式，幫助診斷攝影機問題
@@ -49,6 +49,12 @@ function setup() {
   handpose.on("predict", results => {
     predictions = results;
   });
+}
+
+function windowResized() {
+  resizeCanvas(windowWidth, windowHeight);
+  // 同步調整視訊大小，確保座標系統一致
+  video.size(width, height);
 }
 
 function modelReady() {

@@ -93,6 +93,23 @@ function draw() {
   // 繪製視訊畫面
   image(video, 0, 0, width, height);
 
+  // --- 先處理食指位置邏輯，確保後面的迴圈可以使用變數 ---
+  let fingerX, fingerY;
+  let foundHand = false;
+
+  if (predictions.length > 0 && gameState !== "GAMEOVER") {
+    let hand = predictions[0];
+    let indexFingerTip = hand.landmarks[8];
+    fingerX = indexFingerTip[0];
+    fingerY = indexFingerTip[1];
+    foundHand = true;
+    bladeTrail.push({ x: fingerX, y: fingerY });
+  } else {
+    if (bladeTrail.length > 0) bladeTrail.shift();
+  }
+
+  if (bladeTrail.length > MAX_TRAIL_LEN) bladeTrail.shift();
+
   if (gameState === "PLAYING") {
     // --- 計時器邏輯 ---
     if (millis() - lastTimestamp > 1000) {
@@ -166,36 +183,6 @@ function draw() {
     if (particles[i].finished()) {
       particles.splice(i, 1);
     }
-  }
-
-  // --- 邏輯處理：抓取食指位置 ---
-  let fingerX, fingerY;
-  let foundHand = false;
-
-  // 只有在模型準備好且非結束狀態時抓取手指
-  if (predictions.length > 0 && gameState !== "GAMEOVER") {
-    // 取得第一隻手的偵測結果
-    let hand = predictions[0];
-    // Index Finger Tip (食指指尖) 的 index 是 8
-    // ml5.js Handpose landmarks 索引參考: https://github.com/tensorflow/tfjs-models/tree/master/handpose
-    let indexFingerTip = hand.landmarks[8];
-    
-    fingerX = indexFingerTip[0];
-    fingerY = indexFingerTip[1];
-    foundHand = true;
-    
-    // 將座標加入軌跡陣列
-    bladeTrail.push({ x: fingerX, y: fingerY });
-  } else {
-    // 若沒偵測到手，可以選擇清空軌跡或讓它自然消失
-    if (bladeTrail.length > 0) {
-      bladeTrail.shift();
-    }
-  }
-
-  // 限制軌跡長度，創造出淡出效果的基礎
-  if (bladeTrail.length > MAX_TRAIL_LEN) {
-    bladeTrail.shift();
   }
 
   // --- 繪製刀鋒軌跡 ---
